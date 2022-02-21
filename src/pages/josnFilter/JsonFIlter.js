@@ -23,24 +23,27 @@ const JSONFilterPage = () => {
 
     const updateBorrowers = () => {
         let filterData = [];
-        console.log(filter, filterBorrowers)
-        /*filter.forEach(filterItem => {
-            filterData = data.filter(item => {
-                if (filterItem.as === 'includes') {
-                    return item[filterItem.where].toLowerCase().includes(filterItem.value)
-                } else if (filterItem.as === 'equals') {
-                    return item[filterItem.where].toLowerCase() === filterItem.value
-                }
-            })
-        })*/
-
         filterData = data.filter(item => {
             return filter.every(filterItem => {
+                console.log(filterItem.where === 'startDate')
                 if (filterItem.as === 'includes') {
                     return item[filterItem.where].toLowerCase().includes(filterItem.value)
                 } else if (filterItem.as === 'equals') {
                     return item[filterItem.where].toLowerCase() === filterItem.value
+                } else if (filterItem.as === 'less') {
+                    if (filterItem.where === 'startDate' || filterItem.where === 'dateOfBirth') {
+                        console.log(item[filterItem.where], new Date(filterItem.value))
+                        return new Date(item[filterItem.where]) <= new Date(filterItem.value)
+                    }
+                    return item[filterItem.where] <= filterItem.value
+                } else if (filterItem.as === 'greater') {
+                    if (filterItem.where === 'startDate' || filterItem.where === 'dateOfBirth') {
+                        return new Date(item[filterItem.where]) >= new Date(filterItem.value)
+
+                    }
+                    return item[filterItem.where] >= filterItem.value
                 }
+
 
             })
         })
@@ -66,10 +69,11 @@ const JSONFilterPage = () => {
                                 <option key={item} value={item}>{item}</option>
                             ))}
                         </select>
-                        <select onChange={(e) => setFilterObj(index, e, 'as')}>
-                            {(filterItem.where === 'startDate' || filterItem.where === 'w2Income' || filterItem.where === 'creditScore') ?
+                        {filterItem.where !== '' && <select
+                            onChange={(e) => setFilterObj(index, e, 'as')}>
+                            {(filterItem.where === 'startDate' || filterItem.where === 'dateOfBirth' || filterItem.where === 'w2Income' || filterItem.where === 'creditScore') ?
                                 <>
-                                    <option selected value=""/>
+                                    <option value=""/>
                                     <option value="greater">Greater than
                                     </option>
                                     <option value="less">Less than</option>
@@ -80,10 +84,10 @@ const JSONFilterPage = () => {
                                     <option value="equals">Equals</option>
                                 </>
                             }
-                        </select>
-                        <input
+                        </select>}
+                        {filterItem.where !== '' && <input
                             onChange={event => setFilterObj(index, event, 'value')}
-                            type="text"/>
+                            type={(filterItem.where === 'startDate' || filterItem.where === 'dateOfBirth') ? 'date' : 'text'}/>}
                     </div>
                 })}
             </div>
@@ -96,6 +100,9 @@ const JSONFilterPage = () => {
                     </th>
                     <th>
                         Last name
+                    </th>
+                    <th>
+                        dateOfBirth
                     </th>
                     <th>
                         CreditScore
@@ -137,6 +144,7 @@ const JSONFilterPage = () => {
                     return <tr key={item.id}>
                         <td>{item.firstName}</td>
                         <td>{item.lastName}</td>
+                        <td>{item.dateOfBirth}</td>
                         <td>{item.creditScore}</td>
                         <td>{item.maritalStatus}</td>
                         <td>{item.w2Income}</td>
@@ -150,6 +158,8 @@ const JSONFilterPage = () => {
                         <td>{item.subjectPropertyAddress}</td>
                     </tr>
                 })}
+                {filterBorrowers.length === 0 ? 'No result found make' +
+                    ' changes in filter' : null}
                 </tbody>
             </table>
         </div>
